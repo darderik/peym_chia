@@ -1,0 +1,17 @@
+{
+    "mainConfig": {
+        "temporaryFolder": "G:\\ChiaTmp",
+        "temporarySecondaryFolder": "",
+        "plotDisksWhiteList": [],
+        "plotDisksBlacklist": [
+            "C:"
+        ],
+        "plotSize": 110,
+        "tempPlotSize": 230,
+        "chiaArgs": "plots create -k 32 -t {0} -d {1}\\ChiaPlots -2 {2}",
+        "chiaAdd": "plots add -d '{0}\\ChiaPlots'",
+        "maxConcurrentPlots": 3,
+        "timeOut": 300,
+        "chiaBlockChainFolder": "C:\\Users\\Dardo\\AppData\\Local\\chia-blockchain"
+    }
+}
