@@ -49,7 +49,7 @@ function DetectChiaPlotters {
     #merge these two foreach ffs
     foreach ($process in $maybeProcess) {
         $STime = $process.StartTime
-        $plotterObj = [Plotter]::new($ID, $STime)
+        $plotterObj = [Plotter]::new($process.ID, $STime)
         $null = $Jobs.Add($plotterObj)
     }
 
