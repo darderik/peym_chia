@@ -14,7 +14,8 @@ else {
     $secondaryTemporaryFolder = $MainConfig.secondaryTemporaryFolder
 }
 $finalDisksWhiteList = $MainConfig.plotDisksWhiteList
-$finalDisksBlackList = $MainConfig.plotDisksBlacklist #Add system and temporary volume
+$finalDisksBlackList = $MainConfig.plotDisksBlacklist 
+$finalDisksBlackList = $finalDisksBlackList + ($temporaryFolder | Select-String -pattern "\w:").Matches[0].Value
 
 if ($finalDisksWhiteList.Length -gt 0) {
     [string[]] $finalDisks = (Get-WmiObject win32_logicaldisk | Where-Object { $finalDisksWhiteList.Contains($_.DeviceID) } | ForEach-Object { $_.DeviceID })
