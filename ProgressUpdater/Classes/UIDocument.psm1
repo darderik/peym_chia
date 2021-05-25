@@ -8,7 +8,7 @@ class UIDocument {
     [int]$CurrentRow
     [int]$StatusIdx
     [string]$Status
-    [System.Collections.ArrayList]$Rows = [System.Collections.ArrayList]::new()
+    [Collections.Generic.List[Row]]$Rows = [Collections.Generic.List[Row]]::new()
     [ref]$MainPtr
     UIDocument([ref]$_MainDoc) {
         if ($_MainDoc.Value.GetType().Name -ne "Char[]") { return }
@@ -39,10 +39,17 @@ class UIDocument {
             Write-Bytes " " $this.MainPtr $idx $length
         } 
     }
-    [Row]addRow([string[]]$ToInsert, [string]$_ID) {
+    [Row]addRow([string[]]$ToInsert) {
         $rowPositions = $this.FirstRowPositions | ForEach-Object { $_ + ($this.CurrentRow * $this.BytesToNext) }
-        $rowInstance = [Row]::new($this.MainPtr, $rowPositions, $_ID)
+        $rowInstance = [Row]::new($this.MainPtr, $rowPositions)
         $rowInstance.writeStrings($ToInsert)
+        $this.Rows.Add($rowInstance)
+        $this.CurrentRow++
+        return $rowInstance
+    }
+    [Row]addRow() {
+        $rowPositions = $this.FirstRowPositions | ForEach-Object { $_ + ($this.CurrentRow * $this.BytesToNext) }
+        $rowInstance = [Row]::new($this.MainPtr, $rowPositions)
         $this.Rows.Add($rowInstance)
         $this.CurrentRow++
         return $rowInstance

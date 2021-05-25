@@ -34,16 +34,13 @@ function DetectChiaPlotters {
         }
     }
     #Are there any running plotters unknown to the script?
-    $maybeProcess = New-Object 'System.Collections.ArrayList';
-
+    $maybeProcess = New-Object -Type 'Collections.Generic.List[System.ComponentModel.Component]';
+    $candidateProcessesIds = New-Object -Type 'Collections.Generic.List[Int]';
     $candidateProcesses = Get-Process | Where-Object { $_.Name -ceq "chia" }
+    $null = $candidateProcesses | ForEach-Object { $candidateProcessesIds.Add($_.Id) }
     foreach ($proc in $candidateProcesses) {
-        if ($Jobs.Count -ne 0 -and -not $Jobs.Contains($proc)) {
+        if ($candidateProcesses.Count -ne 0 -and -not $candidateProcessesIds.Contains($proc.Id)) {
             $null = $maybeProcess.Add($proc) 
-        }
-        else {
-            #Jobs is empty, add processes
-            $null = $maybeProcess.Add($proc)
         }
     }
     #merge these two foreach ffs

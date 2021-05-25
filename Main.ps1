@@ -9,12 +9,12 @@ $curPath = (Get-Item -Path $MyInvocation.MyCommand.Path).DirectoryName
 Set-Location $curPath
 
 . .\InitConfig.ps1
-$Jobs = New-Object System.Collections.ArrayList
+$Jobs = New-Object -Type 'Collections.Generic.List[Plotter]'
 
 #Detect eventual running plotters
 $detected = DetectChiaPlotters
 if (-not ($detected.Count -eq 0 -or $detected.ID -eq 0)) {
-    [System.Collections.ArrayList]$Jobs = $detected
+    [Collections.Generic.List[Plotter]]$Jobs = $detected
     Write-Host -ForegroundColor DarkGreen "$(Get-Date -Format "dd/MM HH:mm")Detected running plotters."
     Write-Host ($detected | Format-List | Out-String) -ForegroundColor DarkGreen #todo debug print
 }
@@ -82,7 +82,7 @@ do {
             $isPhase1Over = Select-String -Path $mostRecentPlotLog -Pattern "phase 2/4"
         }
     }
-
+    DisplayLogic "Plotting. Running plotters $($Jobs.Count)"
     Start-Sleep -Seconds $TimeOut
 } while (([System.String](selectHardDisk $finalDisks $plotSize 0)).Length -gt 0)
 

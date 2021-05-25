@@ -3,6 +3,8 @@
 $JsonConfig = Get-Content ".\config.json" | ConvertFrom-Json
 $MainConfig = $JsonConfig.mainConfig
 
+
+$global:DEBUG = $MainConfig.DEBUG
 #Disk configuration \ chia exe
 $temporaryFolder = $MainConfig.temporaryFolder
 #no coalescing operator in ps 5.1

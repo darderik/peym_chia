@@ -4,10 +4,9 @@ class Row {
     [string[]]$writtenStrings
     [string]$Identifier
     [string]$GUID
-    Row([ref]$_Str, $_positions, $_Identifier) {
+    Row([ref]$_PointedStr, $_positions) {
         $this.Positions = $_positions
-        $this.MainString = $_Str
-        $this.Identifier = $_Identifier
+        $this.MainString = $_PointedStr
     }
     [void]writeStrings([string[]]$strArray) {
         if ($strArray.Count -gt $this.positions.Count) {
