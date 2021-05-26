@@ -44,7 +44,7 @@ As you can see, the config is pretty straightforward.
 - chiaBlockChainFolder: Edit this according to your blockchain location
 
 Here's how the output appears
-![output](https://i.imgur.com/pZz6V72.png)
+![output](https://i.imgur.com/8U8M11q.png)
 
 
 
