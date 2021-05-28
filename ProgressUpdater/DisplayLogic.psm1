@@ -27,10 +27,6 @@ $newStrFormatted = $mainStrTemplate.ToCharArray()
 $Doc = [UIDocument]::new($newStrFormatted)
 function DisplayLogic([string]$Status) {
 
-    if ($global:DEBUG) {
-        return
-    }
-
     #
     #grab curphase of all running plotters
     #
@@ -42,6 +38,11 @@ function DisplayLogic([string]$Status) {
         $GUID_ID_DSK = (Get-Content -Path "$($guidFolder.FullName)\Guid-ID.txt" -ErrorAction SilentlyContinue).Split('|') 
         $ID = $GUID_ID_DSK[1] 
         $curPhase = Fetcher $oputPath
+        
+        if ($null -eq $curPhase) {
+            return
+        }
+            
         $rowStrings = @([string]$curPhase.value, [string]$curPhase.table, [string]$curPhase.bucket)
         if ($Rows.Count -le $ctr) {
             $row = $Doc.addRow($rowStrings)
@@ -55,7 +56,9 @@ function DisplayLogic([string]$Status) {
     if ($Status.Length -gt 0) {
         $Doc.setStatus($Status)
     }
-    Clear-Host
+    if (-not $global:DEBUG) {
+        Clear-Host
+    }
     write-chost (-join $Doc.MainPtr.Value) 
     #write-chost technically still not needed, would be nice to add colors
 }

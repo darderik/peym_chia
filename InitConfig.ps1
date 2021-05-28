@@ -1,34 +1,38 @@
-
 #Grab json
 $JsonConfig = Get-Content ".\config.json" | ConvertFrom-Json
 $MainConfig = $JsonConfig.mainConfig
 
 
 $global:DEBUG = $MainConfig.DEBUG
-#Disk configuration \ chia exe
+
+
+#region HDD Fetching
 $temporaryFolder = $MainConfig.temporaryFolder
-#no coalescing operator in ps 5.1
-$secondaryTemporaryFolder;
-if ($MainConfig.secondaryTemporaryFolder -eq "") {
+[string]$secondaryTemporaryFolder;
+if ($MainConfig.temporarySecondaryFolder -eq "") {
     $secondaryTemporaryFolder = $temporaryFolder
 }
 else {
-    $secondaryTemporaryFolder = $MainConfig.secondaryTemporaryFolder
+    $secondaryTemporaryFolder = $MainConfig.temporarySecondaryFolder
 }
+
 $finalDisksWhiteList = $MainConfig.plotDisksWhiteList
 $finalDisksBlackList = $MainConfig.plotDisksBlacklist 
-$finalDisksBlackList = $finalDisksBlackList + ($temporaryFolder | Select-String -pattern "\w:").Matches[0].Value
+$finalDisksBlackList = $finalDisksBlackList + ($temporaryFolder | Select-String -pattern "\w:").Matches[0].Value + ($secondaryTemporaryFolder | Select-String -pattern "\w:").Matches[0].Value
 
 if ($finalDisksWhiteList.Length -gt 0) {
-    [string[]] $finalDisks = (Get-WmiObject win32_logicaldisk | Where-Object { $finalDisksWhiteList.Contains($_.DeviceID) } | ForEach-Object { $_.DeviceID })
+    $finalDisksStr = (Get-WmiObject win32_logicaldisk | Where-Object { $finalDisksWhiteList.Contains($_.DeviceID) } | ForEach-Object { $_.DeviceID })
 }
 else {
-    [string[]] $finalDisks = (Get-WmiObject win32_logicaldisk | Where-Object { -not $finalDisksBlackList.Contains($_.DeviceID) } | ForEach-Object { $_.DeviceID })
+    $finalDisksStr = (Get-WmiObject win32_logicaldisk | Where-Object { -not $finalDisksBlackList.Contains($_.DeviceID) } | ForEach-Object { $_.DeviceID })
 }
-$plotSize = $MainConfig.plotSize
-$tempPlotSize = $MainConfig.tempPlotSize
+[int32]$TempDiskFreeSpaceInGB = ((Get-Volume -FilePath $temporaryFolder).SizeRemaining / 1GB)
+#endregion Hdd Fetching
+
+
+$global:plotSize = $MainConfig.plotSize
+$global:tempPlotSize = $MainConfig.tempPlotSize
 $chiaArgs = $MainConfig.chiaArgs
-[int32]$TempDiskFreeSpaceInGB = ((Get-Volume -FilePath $temporaryFolder).SizeRemaining / (1024 * 1024 * 1024))
 $maxConcurrentPlots = $MainConfig.maxConcurrentPlots
 [int32]$TimeOut = $MainConfig.timeout #seconds
 $MainFolder = $MainConfig.chiaBlockChainFolder + "\*"
@@ -37,13 +41,44 @@ $MainFolderPath = $MainConfig.chiaBlockChainFolder
 [string[]]$latestApp = ($appVersions | Sort-Object -Descending)
 $ChiaExecutable = $MainFolderPath + "\" + "$latestApp\resources\app.asar.unpacked\daemon\chia.exe"
 $ChiaAddArgs = $MainConfig.chiaAdd
+$global:filterTempDisks = $MainConfig.filterTempDisks
+
+#region HDD Objects setup
+$DisksObjs = @{}
+
+#dynamic hard disks will be introduced
+
+#target hard disks
+foreach ($item in ($finalDisksStr)) {
+    $newHD = [HardDrive]::new($item, 0)
+    $DisksObjs.Add($newHD.Label, $newHD)
+}
+
+#temporary 1 hard disks
+$temp1 = @($temporaryFolder)
+foreach ($item in ($temp1)) {
+    $newHD = [HardDrive]::new($item, 1)
+    $DisksObjs.Add($newHD.Label, $newHD)
+}
+
+#temporary 2 hard disks
+$temp2 = @($secondaryTemporaryFolder)
+foreach ($item in ($temp2)) {
+    $newHD = [HardDrive]::new($item, 2)
+    $DisksObjs.Add($newHD.Label, $newHD)
+}
+
+[hashtable]$global:finalDisks = $DisksObjs
+#endregion HDD Objects setup
 
 
-#----------PRECONDITIONS
+
+#region PRECONDITIONS
 #Create streams folder
 if (-not(Test-Path ".\Streams")) {
     mkdir Streams
 }
+
 if (-not (Test-Path -Path $ChiaExecutable)) {
     Write-Host("No chia exe found in path $ChiaExecutable") -ForegroundColor "Red"
     exit
@@ -63,4 +98,4 @@ if ($secondaryTemporaryFolder -ne "" -and $null -ne $secondaryTemporaryFolder ) 
 else {
     $secondaryTemporaryFolder = $temporaryFolder
 }
-#---------END PRECONDITIONS
+#endregion PRECONDITIONS

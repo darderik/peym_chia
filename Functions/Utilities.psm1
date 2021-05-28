@@ -1,4 +1,5 @@
 using module ..\Classes\PlotterClass.psm1
+using module ..\Classes\HardDrive.psm1
 
 function Initialize ($TempDiskFree, $temporaryFolder) {
     #Clean curFolder of all .LOG files
@@ -7,7 +8,7 @@ function Initialize ($TempDiskFree, $temporaryFolder) {
     # Still not ready to delete left tmp plots, too risky
 }
 
-function NewPlot ($ChiaExe, $ChiaArguments, $hdd) {
+function NewPlot ($ChiaExe, $ChiaArguments, [HardDrive[]]$DSKS) {
     [OutputType([Plotter])]
     $GUID = New-Guid
     $GUID = $GUID.ToString()
@@ -16,9 +17,10 @@ function NewPlot ($ChiaExe, $ChiaArguments, $hdd) {
     $relStreamPath = ".\Streams\$GUID\Chia-Plot-$GUID.Log"
     $curProc = Start-Process $ChiaExe -ArgumentList $ChiaArguments -Passthru -RedirectStandardOutput $relStreamPath
     $ID = $curProc.Id
+    $hdd = $DSKS[0].Label
     "$GUID|$ID|$hdd" | Out-File "$GUIDFolder\Guid-ID.txt"
 
-    $curPlotter = [Plotter]::new($curProc.Id, ( Get-Date ), $GUID, (Get-AbsolutePath -Path $GUIDFolder), $hdd)
+    $curPlotter = [Plotter]::new($curProc.Id, ( Get-Date ), $GUID, (Get-AbsolutePath -Path $GUIDFolder), $DSKS)
     return $curPlotter
 }
 
