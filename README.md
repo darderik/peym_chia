@@ -43,5 +43,10 @@ As you can see, the config is pretty straightforward.
 - timeout: timeout between checks (output Update,etc)
 - chiaBlockChainFolder: Edit this according to your blockchain location
 
+Here's how the output appears
+![output](https://i.imgur.com/8U8M11q.png)
+
+
+
 > Written with [StackEdit](https://stackedit.io/).
 
