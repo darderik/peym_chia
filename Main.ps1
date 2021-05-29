@@ -24,11 +24,6 @@ if (-not ($detected.Count -eq 0 -or $detected.ID -eq 0)) {
 #Cleanup temporary folder
 cleanupTemporary($temporaryFolder)
 
-#Initialize temp folder if no chia running
-if ($Jobs.Count -eq 0) {
-    Initialize $TempDiskFreeSpaceInGB $temporaryFolder
-}
-
 #Main Loop
 $isPhase1Over = $null
 [string]$Status
@@ -39,6 +34,8 @@ do {
         if ($MainProcess.HasExited) {
             $curProc.Dispose()
             $Jobs.Remove($curProc)
+            cleanupTemporary($temporaryFolder)
+
         }
     }
     #dynamic temporary volume incoming TOBEREVISED

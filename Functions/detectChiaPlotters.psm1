@@ -22,9 +22,6 @@ function DetectChiaPlotters($disks) {
                 if ([string]::IsNullOrEmpty($ID)) { 
                     throw 
                 }
-                else {
-
-                }
             
             }
             catch {

@@ -1,13 +1,6 @@
 using module ..\Classes\PlotterClass.psm1
 using module ..\Classes\HardDrive.psm1
 
-function Initialize ($TempDiskFree, $temporaryFolder) {
-    #Clean curFolder of all .LOG files
-    Remove-Item ".\Streams\*.log" -ErrorAction SilentlyContinue
-    # Remove-Item -Recurse -Path "$temporaryFolder\*" -ErrorAction SilentlyContinue
-    # Still not ready to delete left tmp plots, too risky
-}
-
 function NewPlot ($ChiaExe, $ChiaArguments, [HardDrive[]]$DSKS) {
     [OutputType([Plotter])]
     $GUID = New-Guid
