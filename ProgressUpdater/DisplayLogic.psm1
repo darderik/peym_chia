@@ -45,7 +45,7 @@ function DisplayLogic([string]$Status) {
             
         $rowStrings = @([string]$curPhase.value, [string]$curPhase.table, [string]$curPhase.bucket)
         if ($Rows.Count -le $ctr) {
-            $row = $Doc.addRow($rowStrings)
+            $Doc.addRow($rowStrings)
         }
         else {
             $Rows[$ctr].writeStrings($rowStrings)

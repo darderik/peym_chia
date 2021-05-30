@@ -8,23 +8,22 @@ function cleanupTemporary([string]$Folder) {
         [bool]$isBeingUsed = $false
         foreach ($file in $matchingFiles) {
             try {
-                $dummyStream = $file.OpenWrite()
+                $dummyStream = [System.IO.StreamWriter]::new( $file.FullName )
             }
             catch {
-
                 $isBeingUsed = $true
                 break           
             }
-        }
-        if ($null -ne $dummyStream) {
-            $dummyStream.Dispose()
-            $dummyStream.Close()
+            finally {
+                if ($dummyStream -ne $null) {
+                    $dummyStream.close() 
+                }
+            }
         }
         if (-not $isBeingUsed) {
             foreach ($file in $matchingFiles) {
-                Remove-Item -Path $file.FullName
+                Remove-Item -Path $file.FullName -ErrorAction Stop -Force
             }
-
         }
     }
 }

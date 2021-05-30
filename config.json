@@ -17,6 +17,6 @@
         "maxConcurrentPlots": 3,
         "timeOut": 120,
         "chiaBlockChainFolder": "C:\\Users\\Dardo\\AppData\\Local\\chia-blockchain",
-        "DEBUG": false
+        "DEBUG": true
     }
 }

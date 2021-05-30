@@ -13,7 +13,6 @@ class HardDrive {
         if ($_role -in 0, 1, 2) {
             $this.Role = $_role
         }
-        $absPath = -join ("$($this.Label)", ":")
         $this.HDDObject = Get-Volume -DriveLetter $this.Label[0]
         
     }
