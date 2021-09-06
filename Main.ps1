@@ -1,9 +1,10 @@
 ﻿#Includes
 using module .\Classes\PlotterClass.psm1
 using module .\Classes\HardDrive.psm1
+using module .\Classes\HardDriveNode.psm1
 using module .\ProgressUpdater\DisplayLogic.psm1
 Import-Module $PSScriptRoot\Functions\detectChiaPlotters.psm1  -Force
-Import-Module $PSScriptRoot\Functions\selectTargetHardDisk.psm1 -Force
+Import-Module $PSScriptRoot\Functions\selectHardDisk.psm1 -Force
 Import-Module $PSScriptRoot\Functions\Utilities.psm1 -Force
 Import-Module $PSScriptRoot\Functions\cleanupTemporary.psm1 -Force
 
@@ -21,12 +22,9 @@ if (-not ($detected.Count -eq 0 -or $detected.ID -eq 0)) {
     Write-Host ($detected | Format-List | Out-String) -ForegroundColor DarkGreen #todo debug print
 }
 
-#Cleanup temporary folder
-cleanupTemporary($temporaryFolder)
 
 #Main Loop
 $isPhase1Over = $null
-[string]$Status
 do { 
     #Update info on running plotters
     foreach ($curProc in $Jobs.ToArray()) {
@@ -34,20 +32,25 @@ do {
         if ($MainProcess.HasExited) {
             $curProc.Dispose()
             $Jobs.Remove($curProc)
-            cleanupTemporary($temporaryFolder)
-
+            foreach ($fld in $temporaryFolders) {
+                cleanupTemporary($fld)
+            }
         }
     }
+
     #dynamic temporary volume incoming TOBEREVISED
-    $temporaryVolumeLabel = (Get-Volume -FilePath $temporaryFolder).DriveLetter + ":"
-    $2temporaryVolumeLabel = (Get-Volume -FilePath $secondaryTemporaryFolder).DriveLetter + ":"
+    $temporaryVolumeLabel = (Get-Volume -FilePath $cur1Temporary.Value.TempPath).DriveLetter + ":"
+    $2temporaryVolumeLabel = (Get-Volume -FilePath $temporarySecondaryFolder).DriveLetter + ":"
 
 
-    if ($finalDisks[$temporaryVolumeLabel].getProjectedFreeSpace(1GB, 1) -le $global:tempPlotSize) {
+    if ($cur1Temporary.Value.getProjectedFreeSpace(1GB, 1) -le $global:tempPlotSize -or $cur1Temporary.Value.LinkedPlotters.Count -ge $maxPlotsPerDisk) {
         DisplayLogic "Space on temporary disk insufficient. Waiting."
+        #try to switch temp disk
+        $cur1Temporary = $cur1Temporary.Next
         Start-Sleep -Seconds ($TimeOut / 2)
         continue
     }
+
     if ($Jobs.Count -ge $maxConcurrentPlots) {
         DisplayLogic "Limit of concurrent plots reached. Waiting."
         Start-Sleep -Seconds ($TimeOut / 2)
@@ -58,7 +61,7 @@ do {
         #no check needed,tempdiskfree is sufficient
         $isPhase1Over = $null
         #Disk selection logic
-        [System.String]$hdd = selectTargetHardDisk $finalDisks
+        [System.String]$hdd = selectHardDisk $finalDisks 0
         if ($hdd.Length -lt 1) {
             #No hard drive with space
             DisplayLogic "No hard drive with sufficient space. Exiting."
@@ -68,16 +71,18 @@ do {
             if (!(Test-Path "$hdd\ChiaPlots")) {
                 New-item -ItemType directory -Path "$hdd\ChiaPlots"
             }
-            DisplayLogic "Starting to plot! Hard Disk: $hdd"
+            DisplayLogic "Plotting|| HDD: $hdd | Temp: $($cur1Temporary.Value.TempPath)"
 
-            $argsString = $chiaArgs -f $temporaryFolder, $hdd, $secondaryTemporaryFolder
+            $argsString = $chiaArgs -f $cur1Temporary.Value.TempPath, $hdd, $temporarySecondaryFolder
 
             #Add plot folder
             $AddArgsFormatted = $ChiaAddArgs -f $hdd
             $CommandAddFormatted = "$ChiaExecutable $AddArgsFormatted"
             Invoke-Expression $CommandAddFormatted
+            #switch temp hdd no matter what
+            [Plotter]$curPlot = NewPlot $ChiaExecutable $argsString @($finalDisks[$hdd], $cur1Temporary.Value, $finalDisks[$2temporaryVolumeLabel])
+            $cur1Temporary = $cur1Temporary.Next
 
-            [Plotter]$curPlot = NewPlot $ChiaExecutable $argsString @($finalDisks[$hdd], $finalDisks[$temporaryVolumeLabel], $finalDisks[$2temporaryVolumeLabel])
             if ($null -ne $curPlot) {
                 $Jobs.Add($curPlot)
             }
@@ -93,6 +98,6 @@ do {
     DisplayLogic "Plotting. Running plotters $($Jobs.Count)"
     
     Start-Sleep -Seconds $TimeOut
-} while (([System.String](selectTargetHardDisk $finalDisks)).Length -gt 0)
+} while (([System.String](selectHardDisk $finalDisks 0)).Length -gt 0)
 
 Read-Host

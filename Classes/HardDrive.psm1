@@ -4,7 +4,9 @@
 
 class HardDrive {
     [string]$Label
-    [int]$Role 
+    [int]$Role
+    [string]$TempPath
+    [string]$PlotsPath 
     [hashtable]$LinkedPlotters = @{}
     [System.Object]$HDDObject
     HardDrive([string]$Path, [int]$_role) {
@@ -13,15 +15,24 @@ class HardDrive {
         if ($_role -in 0, 1, 2) {
             $this.Role = $_role
         }
-        $this.HDDObject = Get-Volume -DriveLetter $this.Label[0]
+        try {
+            $this.HDDObject = Get-Volume -DriveLetter $this.Label[0] -ErrorAction Stop
+        }
+        catch { 
+            return 
+        }
         
     }
     HardDrive([string]$Path) {
         $lab = ( $Path | Select-String -Pattern "\w:" ).Matches[0].Value
         $this.Label = $lab
         $this.Role = 0
-        $this.HDDObject = Get-Volume -DriveLetter $this.Label[0]
-
+        try {
+            $this.HDDObject = Get-Volume -DriveLetter $this.Label[0] -ErrorAction Stop
+        }
+        catch {
+            return
+        }
     }
     [int]getFreeSpace($mUnit) {
         return ($this.HDDObject.SizeRemaining) / $mUnit

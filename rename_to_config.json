@@ -1,0 +1,23 @@
+{
+    "mainConfig": {
+        "temporaryFolders": [
+            "D:\\ChiaTmp"
+        ],
+        "temporarySecondaryFolder": "G:\\ChiaSecondTmp",
+        "plotDisksWhiteList": [],
+        "plotDisksBlacklist": [
+            "C:",
+            "G:"
+        ],
+        "plotSize": 110,
+        "filterTempDisks": true,
+        "tempPlotSize": 230,
+        "chiaArgs": "plots create -k 32 -t {0} -d {1}\\ChiaPlots -2 {2}",
+        "chiaAdd": "plots add -d '{0}\\ChiaPlots'",
+        "maxConcurrentPlots": 3,
+        "maxPlotsPerDisk": 1,
+        "timeOut": 120,
+        "chiaBlockChainFolder": "C:\\Users\\USR\\AppData\\Local\\chia-blockchain",
+        "DEBUG": false
+    }
+}

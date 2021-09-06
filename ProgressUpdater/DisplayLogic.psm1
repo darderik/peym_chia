@@ -5,22 +5,22 @@ using module .\Functions\Fetcher.psm1;
 using module .\Functions\write-chost.psm1
 $mainStrTemplate = "
     /____________________________________________________________________\
-    |                                                                    |
-    |                                                                    |
-    |   Phase         Table      Bucket          Operation               |
-    |                                                                    |
-    |   {0}           {1}         {2}             {3}                    |
-    |   {4}           {5}         {6}             {7}                    |
-    |                                                                    |
-    |                                                                    |
-    |                                                                    |
-    |                                                                    |
-    |                                                                    |
-    |                                                                    |
-    |                                                                    |
-    |                                                                    |
-    |--------------------------------------------------------------------|
-    Program Status : {stat}                                              "
+    |                                                                    |                                                                
+    |                                                                    |                                                            
+    |   Phase         Table      Bucket          Operation               |                              
+    |                                                                    |                              
+    |   {0}           {1}         {2}             {3}                    |                              
+    |   {4}           {5}         {6}             {7}                    |                              
+    |                                                                    |                              
+    |                                                                    |                              
+    |                                                                    |                              
+    |                                                                    |                              
+    |                                                                    |                              
+    |                                                                    |                              
+    |                                                                    |                              
+    |                                                                    |                              
+    |--------------------------------------------------------------------|                              
+    Program Status : {stat}                                                                                         "  
 #This char[] will be passed by ref
 $newStrFormatted = $mainStrTemplate.ToCharArray()
 #Create uidocument instance
